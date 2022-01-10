@@ -28,19 +28,23 @@ shutdown(void) {
 
 int
 evget(void) {
-	switch (tb_peek_event(&ev, PEEKTIME)) {
+	int pe;
+	
+	pe = tb_peek_event(&ev, PEEKTIME);
+	
+	switch (pe) {
 	case TB_OK:
-		return 0;
 	case TB_ERR_NO_EVENT:
-		return -1;
+		break;
 	case TB_ERR_POLL:
 		if (tb_last_errno() == EINTR)
-			return -2;
+			break;
 		/* fallthrough */
 	default: /* all other ERRs */
 		tb_strerror(tb_last_errno());
-		return -3;
 	}
+	
+	return pe;
 }
 
 void
@@ -113,8 +117,9 @@ main()
 	
 	for(;;) {
 		if (evget() < 0)
-			continue;
+			goto end;
 		evhandle();
+	end:
 		tb_present();
 	}
 	
