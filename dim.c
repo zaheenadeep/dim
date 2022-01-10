@@ -8,7 +8,6 @@
 #define PEEKTIME 1000 /* milliseconds */
 
 typedef struct Cursor Cursor;
-
 struct Cursor {
 	int x; /* starts at 0 */
 	int y; /* starts at 0 */
@@ -17,7 +16,8 @@ struct Cursor {
 struct tb_event ev;
 Cursor cursor;
 
-void error(const char *s) {
+void
+error(const char *s) {
 	fprintf(stderr, s);
 }
 
@@ -43,7 +43,8 @@ evget(void) {
 	}
 }
 
-void setcursor(int x, int y) {
+void
+setcursor(int x, int y) {
 	if (tb_set_cursor(x, y) < 0) {
 		tb_strerror(tb_last_errno());
 		return;
@@ -53,7 +54,8 @@ void setcursor(int x, int y) {
 	cursor.y = y;
 }
 
-void evhandle(void) {
+void
+evhandle(void) {
 	int ht, wd;
 	Cursor *c;
 	
