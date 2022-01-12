@@ -1,20 +1,39 @@
+#include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <err.h>
 
 #define TB_IMPL
 #include "termbox.h"
 
-#define PEEKTIME 1000 /* milliseconds */
+enum {
+      PEEKTIME = 1000, /* milliseconds */
+      NLBUF    = 1024,
+};
 
 typedef struct Cursor Cursor;
+typedef struct Line Line;
+typedef struct Matrix Matrix;
+
 struct Cursor {
 	int x; /* starts at 0 */
 	int y; /* starts at 0 */
 };
 
+struct Line {
+	char    buf[NLBUF];   /* line buffer including \n \r and \0 */
+	int     nbuf;         /* buffer length excluding \0 */
+};
+
+struct Matrix {
+	Line *lines;
+	int  nlines;
+};
+
 struct tb_event ev;
 Cursor cursor;
+Matrix matrix;
 
 void
 error(const char *s) {
@@ -39,7 +58,7 @@ evget(void) {
 	case TB_ERR_POLL:
 		if (tb_last_errno() == EINTR)
 			break;
-		/* fallthrough */
+		/* else fallthrough */
 	default: /* all other ERRs */
 		tb_strerror(tb_last_errno());
 	}
@@ -63,7 +82,13 @@ evhandle(void) {
 	int ht, wd;
 	Cursor *c;
 	
-	if (ev.type != TB_EVENT_KEY) {
+	switch (ev.type) {
+	case TB_EVENT_KEY:
+		break;
+	case TB_EVENT_RESIZE:
+		/* TODO */
+		return;
+	default:
 		error("not an event key");
 		return;
 	}
@@ -106,16 +131,50 @@ evhandle(void) {
 	}
 }
 
+void
+loadfile(int argc, char *argv[]) {
+	FILE *fp;
+	char *fg;
+	Matrix *mp;
+
+	if (argc != 2) {
+		error("usage: dim <filename>\n");
+		exit(1);
+	}
+
+	fp = fopen(argv[1], "r");
+	if (fp == NULL)
+		err(1, "failed to open file");
+
+	mp = &matrix;
+	mp->lines = NULL;
+	mp->nlines = 0;
+	do {
+		Line *lp;
+
+		lp = reallocarray(mp->lines, mp->nlines + 1, NLBUF);
+		if (lp == NULL) {
+			free(mp->lines);
+			err(1, "failed to reallocate line buf");
+		}
+		mp->lines = lp;
+
+		fg = fgets(mp->lines->buf, NLBUF - 1, fp);
+	} while (fg != NULL);
+}
+
 int
-main()
+main(int argc, char *argv[])
 {
 	tb_init();
 	atexit(shutdown);
 
 	setcursor(0, 0);
 	tb_present();
-	
-	for(;;) {
+
+	loadfile(argc, argv);
+
+        for(;;) {
 		if (evget() < 0)
 			goto end;
 		evhandle();
