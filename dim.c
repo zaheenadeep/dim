@@ -28,8 +28,8 @@ struct Line {
 };
 
 struct Matrix {
-	Line *lines;
-	int  nlines;
+	Line *lines;          /* holds every line in a file with */
+	int  nlines           /* number of lines */
 };
 
 struct tb_event ev;
@@ -37,17 +37,20 @@ Cursor cursor;
 Matrix matrix;
 
 void
-error(const char *s) {
+error(const char *s)
+{
 	fprintf(stderr, s);
 }
 
 void
-shutdown(void) {
+shutdown(void)
+{
 	tb_shutdown();
 }
 
 int
-evget(void) {
+evget(void)
+{
 	int pe;
 	
 	pe = tb_peek_event(&ev, PEEKTIME);
@@ -68,7 +71,8 @@ evget(void) {
 }
 
 void
-setcursor(int x, int y) {
+setcursor(int x, int y)
+{
 	if (tb_set_cursor(x, y) < 0) {
 		tb_strerror(tb_last_errno());
 		return;
@@ -79,7 +83,8 @@ setcursor(int x, int y) {
 }
 
 void
-evhandle(void) {
+evhandle(void)
+{
 	int ht, wd;
 	Cursor *c;
 	
@@ -133,7 +138,8 @@ evhandle(void) {
 }
 
 void
-matloadfile(int argc, char *argv[]) {
+matloadfile(int argc, char *argv[])
+{
 	FILE *fp;
 	char *fg;
 	Matrix *mp;
@@ -174,6 +180,11 @@ matloadfile(int argc, char *argv[]) {
 		strcpy(newlp->buf, lbuf);
 		newlp->nbuf = strlen(lbuf) + 1;
 	}
+}
+
+void matdisplay()
+{
+	
 }
 
 int
