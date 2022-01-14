@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <err.h>
@@ -149,18 +150,30 @@ loadfile(int argc, char *argv[]) {
 	mp = &matrix;
 	mp->lines = NULL;
 	mp->nlines = 0;
-	do {
-		Line *lp;
+	for(;;) {
+		Line *larr;
+		char lbuf[NLBUF];
+		Line *newlp;
+		
+		fg = fgets(lbuf, NLBUF - 1, fp);
+		if (fg == NULL) {
+			fclose(fp);
+			return;
+		}
 
-		lp = reallocarray(mp->lines, mp->nlines + 1, NLBUF);
-		if (lp == NULL) {
+		larr = reallocarray(mp->lines, mp->nlines + 1, sizeof(Line));
+		if (larr == NULL) {
 			free(mp->lines);
+			fclose(fp);
 			err(1, "failed to reallocate line buf");
 		}
-		mp->lines = lp;
-
-		fg = fgets(mp->lines->buf, NLBUF - 1, fp);
-	} while (fg != NULL);
+		mp->lines = larr;
+		mp->nlines++;
+	        
+		newlp = &(mp->lines[mp->nlines - 1]);
+		strcpy(newlp->buf, lbuf);
+		newlp->nbuf = strlen(lbuf) + 1;
+	}
 }
 
 int
