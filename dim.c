@@ -29,7 +29,7 @@ struct Line {
 
 struct Matrix {
 	Line *lines;          /* holds every line in a file with */
-	int  nlines           /* number of lines */
+	int  nlines;          /* number of lines */
 };
 
 struct tb_event ev;
