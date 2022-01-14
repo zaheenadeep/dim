@@ -133,7 +133,7 @@ evhandle(void) {
 }
 
 void
-loadfile(int argc, char *argv[]) {
+matloadfile(int argc, char *argv[]) {
 	FILE *fp;
 	char *fg;
 	Matrix *mp;
@@ -185,7 +185,7 @@ main(int argc, char *argv[])
 	setcursor(0, 0);
 	tb_present();
 
-	loadfile(argc, argv);
+	matloadfile(argc, argv);
 
         for(;;) {
 		if (evget() < 0)
