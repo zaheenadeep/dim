@@ -179,7 +179,6 @@ matloadfile(int argc, char *argv[])
 		
 		fg = fgets(lbuf, NLBUF - 1, fp);
 		if (fg == NULL) {
-			matfree();
 			fclose(fp);
 			return;
 		}
