@@ -138,11 +138,27 @@ evhandle(void)
 }
 
 void
+matinit()
+{
+	Matrix *m;
+
+	m = &matrix;
+	m->lines = NULL;
+	m->nlines = 0;
+}
+
+void
+matfree(void)
+{
+	free(matrix.lines);
+}
+
+void
 matloadfile(int argc, char *argv[])
 {
 	FILE *fp;
 	char *fg;
-	Matrix *mp;
+	Matrix *m;
 
 	if (argc != 2) {
 		error("usage: dim <filename>\n");
@@ -153,9 +169,9 @@ matloadfile(int argc, char *argv[])
 	if (fp == NULL)
 		err(1, "failed to open file");
 
-	mp = &matrix;
-	mp->lines = NULL;
-	mp->nlines = 0;
+	
+	matinit();
+	m = &matrix;
 	for(;;) {
 		Line *larr;
 		char lbuf[NLBUF];
@@ -163,20 +179,21 @@ matloadfile(int argc, char *argv[])
 		
 		fg = fgets(lbuf, NLBUF - 1, fp);
 		if (fg == NULL) {
+			matfree();
 			fclose(fp);
 			return;
 		}
 
-		larr = reallocarray(mp->lines, mp->nlines + 1, sizeof(Line));
+		larr = reallocarray(m->lines, m->nlines + 1, sizeof(Line));
 		if (larr == NULL) {
-			free(mp->lines);
+			matfree();
 			fclose(fp);
 			err(1, "failed to reallocate line buf");
 		}
-		mp->lines = larr;
-		mp->nlines++;
+		m->lines = larr;
+		m->nlines++;
 	        
-		newlp = &(mp->lines[mp->nlines - 1]);
+		newlp = &(m->lines[m->nlines - 1]);
 		strcpy(newlp->buf, lbuf);
 		newlp->nbuf = strlen(lbuf) + 1;
 	}
@@ -184,7 +201,14 @@ matloadfile(int argc, char *argv[])
 
 void matdisplay()
 {
-	
+	int i;
+	Matrix *m;
+
+	m = &matrix;
+
+	for (i = 0; i < m->nlines && i < tb_height(); i++) {
+		tb_print(0, i, TB_DEFAULT, TB_DEFAULT, m->lines[i].buf);
+	}
 }
 
 int
@@ -199,6 +223,7 @@ main(int argc, char *argv[])
 	matloadfile(argc, argv);
 
         for(;;) {
+		matdisplay();
 		if (evget() < 0)
 			goto end;
 		evhandle();
