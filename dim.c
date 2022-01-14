@@ -48,6 +48,27 @@ shutdown(void)
 	tb_shutdown();
 }
 
+
+char *nfgets(char *buf, int size, FILE *stream)
+{
+	int ch;
+	char *iter;
+
+	iter = buf;	
+	while (size > 1 && (ch = getc(stream)) != EOF && ch != '\n') {
+		*iter = ch;
+		iter++;
+		size--;
+	}
+	*iter = '\0';
+
+	if (ch == EOF && iter == buf)
+		/* If the only char scanned is EOF */
+		return NULL;
+	else
+		return buf;
+}
+
 int
 evget(void)
 {
@@ -177,7 +198,7 @@ matloadfile(int argc, char *argv[])
 		char lbuf[NLBUF];
 		Line *newlp;
 		
-		fg = fgets(lbuf, NLBUF - 1, fp);
+		fg = nfgets(lbuf, NLBUF - 1, fp);
 		if (fg == NULL) {
 			fclose(fp);
 			return;
@@ -206,7 +227,8 @@ void matdisplay()
 	m = &matrix;
 
 	for (i = 0; i < m->nlines && i < tb_height(); i++) {
-		tb_print(0, i, TB_DEFAULT, TB_DEFAULT, m->lines[i].buf);
+		tb_print(0, i, TB_DEFAULT, TB_DEFAULT, "~");
+		tb_print(2, i, TB_DEFAULT, TB_DEFAULT, m->lines[i].buf);
 	}
 }
 
