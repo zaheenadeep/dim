@@ -23,7 +23,7 @@ struct Cursor {
 };
 
 struct Line {
-	char    buf[NLBUF];   /* line buffer including \n \r and \0 */
+	char    buf[NLBUF];   /* line buffer including \r \0 */
 	int     nbuf;         /* buffer length excluding \0 */
 };
 
@@ -49,7 +49,8 @@ shutdown(void)
 }
 
 
-char *nfgets(char *buf, int size, FILE *stream)
+char *
+nfgets(char *buf, int size, FILE *stream)
 {
 	int ch;
 	char *iter;
@@ -159,7 +160,7 @@ evhandle(void)
 }
 
 void
-matinit()
+matinit(void)
 {
 	Matrix *m;
 
@@ -178,7 +179,6 @@ void
 matloadfile(int argc, char *argv[])
 {
 	FILE *fp;
-	char *fg;
 	Matrix *m;
 
 	if (argc != 2) {
@@ -194,9 +194,9 @@ matloadfile(int argc, char *argv[])
 	matinit();
 	m = &matrix;
 	for(;;) {
-		Line *larr;
 		char lbuf[NLBUF];
-		Line *newlp;
+		char *fg;
+		Line *larr, *lp;
 		
 		fg = nfgets(lbuf, NLBUF - 1, fp);
 		if (fg == NULL) {
@@ -213,13 +213,14 @@ matloadfile(int argc, char *argv[])
 		m->lines = larr;
 		m->nlines++;
 	        
-		newlp = &(m->lines[m->nlines - 1]);
-		strcpy(newlp->buf, lbuf);
-		newlp->nbuf = strlen(lbuf) + 1;
+		lp = &(m->lines[m->nlines - 1]);
+		strcpy(lp->buf, lbuf);
+		lp->nbuf = strlen(lbuf) + 1;
 	}
 }
 
-void matdisplay()
+void
+matdisplay(void)
 {
 	int i;
 	Matrix *m;
