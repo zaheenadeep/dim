@@ -32,9 +32,10 @@ struct Matrix {
 	int  nlines;          /* number of lines */
 };
 
-struct tb_event ev;
-Cursor cursor;
-Matrix matrix;
+struct tb_event  ev;
+Cursor           cursor;
+Matrix           matrix;
+int              istart;
 
 void
 error(const char *s)
@@ -117,7 +118,7 @@ evhandle(void)
 		/* TODO */
 		return;
 	default:
-		error("not an event key");
+		error("not an event key\n");
 		return;
 	}
 
@@ -149,10 +150,10 @@ evhandle(void)
 		setcursor(wd - 1, c->y);
 		break;
 	case TB_KEY_PGUP:
-		setcursor(c->x, 0);
+		istart -= tb_height();
 		break;
-	case TB_KEY_PGDN:
-		setcursor(c->x, ht - 1);
+	case TB_KEY_PGDN:	
+		istart += tb_height();
 		break;
 	case TB_KEY_CTRL_Q:
 		exit(0);
@@ -188,7 +189,7 @@ matloadfile(int argc, char *argv[])
 
 	fp = fopen(argv[1], "r");
 	if (fp == NULL)
-		err(1, "failed to open file");
+		err(1, "failed to open file\n");
 
 	
 	matinit();
@@ -208,7 +209,7 @@ matloadfile(int argc, char *argv[])
 		if (larr == NULL) {
 			matfree();
 			fclose(fp);
-			err(1, "failed to reallocate line buf");
+			err(1, "failed to reallocate line buf\n");
 		}
 		m->lines = larr;
 		m->nlines++;
@@ -227,9 +228,9 @@ matdisplay(void)
 
 	m = &matrix;
 
-	for (i = 0; i < m->nlines && i < tb_height(); i++) {
+	for (i = 0; i < m->nlines && i < tb_height(); i++) {		
 		tb_print(0, i, TB_DEFAULT, TB_DEFAULT, "~");
-		tb_print(2, i, TB_DEFAULT, TB_DEFAULT, m->lines[i].buf);
+		tb_print(2, i, TB_DEFAULT, TB_DEFAULT, m->lines[istart+i].buf);
 	}
 }
 
@@ -243,8 +244,9 @@ main(int argc, char *argv[])
 	tb_present();
 
 	matloadfile(argc, argv);
-
+	istart = 0;
         for(;;) {
+		tb_clear();
 		matdisplay();
 		if (evget() < 0)
 			goto end;
