@@ -133,10 +133,14 @@ evhandle(void)
 	case TB_KEY_ARROW_UP:
 		if (c->y > 0)
 			setcursor(c->x, c->y - 1);
+		else if (istart >= 1)
+			istart--;
 		break;
 	case TB_KEY_ARROW_DOWN:
 		if (c->y < ht)
 			setcursor(c->x, c->y + 1);
+		else if (c->y < m->nlines - 1)
+			istart++;
 		break;
 	case TB_KEY_ARROW_LEFT:
 		if (c->x > 0)
@@ -211,6 +215,7 @@ matloadfile(int argc, char *argv[])
 			return;
 		}
 
+		/* allocate new Line in matrix */
 		larr = reallocarray(m->lines, m->nlines + 1, sizeof(Line));
 		if (larr == NULL) {
 			matfree();
@@ -220,6 +225,7 @@ matloadfile(int argc, char *argv[])
 		m->lines = larr;
 		m->nlines++;
 
+		/* fill up new Line */
 		lp = &(m->lines[m->nlines - 1]);
 		strcpy(lp->buf, lbuf);
 		lp->nbuf = strlen(lbuf) + 1;
@@ -243,11 +249,9 @@ main(int argc, char *argv[])
 {
 	tb_init();
 	atexit(shutdown);
-
 	setcursor(0, 0);
-	tb_present();
 
-	matloadfile(argc, argv);
+        matloadfile(argc, argv);
 	istart = 0;
         for(;;) {
 		tb_clear();
