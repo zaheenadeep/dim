@@ -57,7 +57,8 @@ nfgets(char *buf, int size, FILE *stream)
 	char *iter;
 
 	iter = buf;	
-	while (size > 1 && (ch = getc(stream)) != EOF && ch != '\n') {
+	while (size > 1 && (ch = getc(stream)) != EOF
+	       && ch != '\n' && ch != '\r') {
 		*iter = ch;
 		iter++;
 		size--;
@@ -110,6 +111,7 @@ evhandle(void)
 {
 	int ht, wd;
 	Cursor *c;
+	Matrix *m;
 	
 	switch (ev.type) {
 	case TB_EVENT_KEY:
@@ -122,6 +124,7 @@ evhandle(void)
 		return;
 	}
 
+	m = &matrix;
 	c = &cursor;
 	ht = tb_height();
 	wd = tb_width();
@@ -150,10 +153,14 @@ evhandle(void)
 		setcursor(wd - 1, c->y);
 		break;
 	case TB_KEY_PGUP:
-		istart -= tb_height();
+		istart -= ht;
+		if (istart < 0)
+			istart = 0;
 		break;
-	case TB_KEY_PGDN:	
-		istart += tb_height();
+	case TB_KEY_PGDN:
+		istart += ht;
+		if (istart + ht >= m->nlines)
+			istart = m->nlines - 1 - ht;
 		break;
 	case TB_KEY_CTRL_Q:
 		exit(0);
@@ -190,7 +197,6 @@ matloadfile(int argc, char *argv[])
 	fp = fopen(argv[1], "r");
 	if (fp == NULL)
 		err(1, "failed to open file\n");
-
 	
 	matinit();
 	m = &matrix;
@@ -213,7 +219,7 @@ matloadfile(int argc, char *argv[])
 		}
 		m->lines = larr;
 		m->nlines++;
-	        
+
 		lp = &(m->lines[m->nlines - 1]);
 		strcpy(lp->buf, lbuf);
 		lp->nbuf = strlen(lbuf) + 1;
@@ -227,10 +233,8 @@ matdisplay(void)
 	Matrix *m;
 
 	m = &matrix;
-
-	for (i = 0; i < m->nlines && i < tb_height(); i++) {		
-		tb_print(0, i, TB_DEFAULT, TB_DEFAULT, "~");
-		tb_print(2, i, TB_DEFAULT, TB_DEFAULT, m->lines[istart+i].buf);
+	for (i = 0; i < m->nlines && i < tb_height(); i++) {
+		tb_print(0, i, TB_DEFAULT, TB_DEFAULT, m->lines[istart+i].buf);
 	}
 }
 
