@@ -150,7 +150,7 @@ evhandle(void)
 		setcursor(0, c->y);
 		break;
 	case TB_KEY_END:
-		setcursor(wd - 1, c->y);
+		setcursor(m->lines[c->y].nbuf - 1, c->y);
 		break;
 	case TB_KEY_PGUP:
 		istart -= ht;
