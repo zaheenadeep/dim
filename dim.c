@@ -23,7 +23,7 @@ struct Cursor {
 };
 
 struct Line {
-	char    buf[NLBUF];   /* line buffer including \r \0 */
+	char    buf[NLBUF];   /* line buffer including \0 */
 	int     nbuf;         /* buffer length excluding \0 */
 };
 
@@ -137,9 +137,9 @@ evhandle(void)
 			istart--;
 		break;
 	case TB_KEY_ARROW_DOWN:
-		if (c->y < ht)
+		if (c->y <= ht - 2)
 			setcursor(c->x, c->y + 1);
-		else if (c->y < m->nlines - 1)
+		else if (istart <= m->nlines - ht)
 			istart++;
 		break;
 	case TB_KEY_ARROW_LEFT:
@@ -164,7 +164,7 @@ evhandle(void)
 	case TB_KEY_PGDN:
 		istart += ht;
 		if (istart + ht >= m->nlines)
-			istart = m->nlines - 1 - ht;
+			istart = m->nlines - 1 - ht; /* TODO error: stops two lines before */
 		break;
 	case TB_KEY_CTRL_Q:
 		exit(0);
@@ -251,9 +251,9 @@ main(int argc, char *argv[])
 	atexit(shutdown);
 	setcursor(0, 0);
 
-        matloadfile(argc, argv);
+      matloadfile(argc, argv);
 	istart = 0;
-        for(;;) {
+	for(;;) {
 		tb_clear();
 		matdisplay();
 		if (evget() < 0)
