@@ -12,6 +12,7 @@ enum {
       PEEKTIME = 1000, /* milliseconds */
       NLBUF    = 1024,
 };
+
 typedef struct Cursor Cursor;
 typedef struct Line Line;
 typedef struct Matrix Matrix;
@@ -52,8 +53,8 @@ shutdown(void)
 char *
 nfgets(char *buf, int size, FILE *stream)
 {
-	int ch;
-	char *iter;
+	register int ch;
+	register char *iter;
 
 	iter = buf;	
 	while (size > 1 && (ch = getc(stream)) != EOF
@@ -254,7 +255,7 @@ main(int argc, char *argv[])
 	atexit(shutdown);
 	setcursor(0, 0);
 
-      matloadfile(argc, argv);
+	matloadfile(argc, argv);
 	istart = 0;
 	for(;;) {
 		tb_clear();
