@@ -12,7 +12,6 @@ enum {
       PEEKTIME = 1000, /* milliseconds */
       NLBUF    = 1024,
 };
-
 typedef struct Cursor Cursor;
 typedef struct Line Line;
 typedef struct Matrix Matrix;
@@ -139,7 +138,7 @@ evhandle(void)
 	case TB_KEY_ARROW_DOWN:
 		if (c->y <= ht - 2)
 			setcursor(c->x, c->y + 1);
-		else if (istart <= m->nlines - ht)
+		else if (istart <= m->nlines - ht - 1)
 			istart++;
 		break;
 	case TB_KEY_ARROW_LEFT:
@@ -164,7 +163,7 @@ evhandle(void)
 	case TB_KEY_PGDN:
 		istart += ht;
 		if (istart + ht >= m->nlines)
-			istart = m->nlines - 1 - ht; /* TODO error: stops two lines before */
+			istart = m->nlines - ht;
 		break;
 	case TB_KEY_CTRL_Q:
 		exit(0);
