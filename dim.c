@@ -9,7 +9,7 @@
 #include "termbox.h"
 
 enum {
-      PEEKTIME = 1000, /* milliseconds */
+      PEEKTIME = 100, /* milliseconds */
       NLBUF    = 1024,
 };
 
