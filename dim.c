@@ -234,12 +234,16 @@ matloadfile(int argc, char *argv[])
 void
 matdisplay(void)
 {
-	int i;
+	int c, r;
 	Matrix *m;
 
 	m = &matrix;
-	for (i = 0; i < m->nlines && i < tb_height(); i++) {
-		tb_print(0, i, TB_DEFAULT, TB_DEFAULT, m->lines[istart+i].buf);
+	for (r = 0; r < m->nlines && r < tb_height(); r++) {
+		/*tb_print(0, r, TB_DEFAULT, TB_DEFAULT, m->lines[istart+r].buf);*/
+		Line *lp;
+		lp = &(m->lines[istart + r]);
+		for (c = 0; c < lp->nbuf; c++)
+			tb_set_cell(c, r, lp->buf[c], TB_DEFAULT, TB_DEFAULT);
 	}
 }
 
