@@ -10,8 +10,8 @@
 
 /* TODO: see what MLE does to not overwhelm CPU */
 enum {
-      PEEKTIME = 100, /* milliseconds */
-      NLBUF    = 1024,
+      PEEKTIME	= 100,		/* milliseconds */
+      NLBUF	= 1024,
 };
 
 typedef struct Cursor Cursor;
@@ -19,25 +19,25 @@ typedef struct Line Line;
 typedef struct Matrix Matrix;
 
 struct Cursor {
-	int x; /* starts at 0 */
-	int y; /* starts at 0 */
+	int	x;		/* starts at 0 */
+	int	y;		/* starts at 0 */
 };
 
 struct Line {
-	char    buf[NLBUF];   /* line buffer including \0 */
-	int     nbuf;         /* buffer length excluding \0 */
+	char	buf[NLBUF];	/* line buffer including \0 */
+	int	nbuf;		/* buffer length excluding \0 */
 };
 
 struct Matrix {
-	Line *lines;          /* holds every line in a file with */
-	int  nlines;          /* number of lines */
+	Line	*lines;		/* holds every line in a file with */
+	int	nlines;		/* number of lines */
 };
 
-struct tb_event  ev;
-Cursor           cursor;
-Matrix           matrix;
-int              istart;
-/*TODO int colstart;*/
+struct tb_event	ev;		/* current event */
+Cursor		cursor;		/* current cursor position */
+Matrix		matrix;		/* the entire display */
+int		irstart;	/* row starting index for display */
+int		icstart;	/* col starting index for display */
 
 void
 shut(int stat)
