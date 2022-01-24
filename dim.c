@@ -8,6 +8,7 @@
 #define TB_IMPL
 #include "termbox.h"
 
+/* TODO: see what MLE does to not overwhelm CPU */
 enum {
       PEEKTIME = 100, /* milliseconds */
       NLBUF    = 1024,
@@ -36,19 +37,30 @@ struct tb_event  ev;
 Cursor           cursor;
 Matrix           matrix;
 int              istart;
+/*TODO int colstart;*/
 
+void
+shut(int stat)
+{
+	tb_shutdown();
+	exit(stat);
+}
+
+void
+eshut(int stat, const char *s)
+{
+	tb_shutdown();
+	fprintf(stderr, s);
+	exit(stat);
+}
+
+/*TODO print error in the bottom row*/
 void
 error(const char *s)
 {
 	fprintf(stderr, s);
+	fflush(stderr);
 }
-
-void
-shutdown(void)
-{
-	tb_shutdown();
-}
-
 
 char *
 nfgets(char *buf, int size, FILE *stream)
@@ -167,7 +179,7 @@ evhandle(void)
 			istart = m->nlines - ht;
 		break;
 	case TB_KEY_CTRL_Q:
-		exit(0);
+		shut(0);
 	}
 }
 
@@ -193,14 +205,12 @@ matloadfile(int argc, char *argv[])
 	FILE *fp;
 	Matrix *m;
 
-	if (argc != 2) {
-		error("usage: dim <filename>\n");
-		exit(1);
-	}
+	if (argc != 2)
+		eshut(1, "usage: dim <filename>\n");
 
 	fp = fopen(argv[1], "r");
 	if (fp == NULL)
-		err(1, "failed to open file\n");
+		eshut(1, strerror(errno));
 	
 	matinit();
 	m = &matrix;
@@ -220,7 +230,7 @@ matloadfile(int argc, char *argv[])
 		if (larr == NULL) {
 			matfree();
 			fclose(fp);
-			err(1, "failed to reallocate line buf\n");
+			eshut(1, strerror(errno));
 		}
 		m->lines = larr;
 		m->nlines++;
@@ -252,7 +262,6 @@ int
 main(int argc, char *argv[])
 {
 	tb_init();
-	atexit(shutdown);
 	setcursor(0, 0);
 
 	matloadfile(argc, argv);
