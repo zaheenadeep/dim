@@ -6,7 +6,7 @@
 #include <err.h>
 
 #define TB_IMPL
-#include "termbox.h"
+#include "termbox2.h"
 
 /* TODO: see what MLE does to not overwhelm CPU */
 enum
