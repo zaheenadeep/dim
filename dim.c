@@ -9,35 +9,40 @@
 #include "termbox.h"
 
 /* TODO: see what MLE does to not overwhelm CPU */
-enum {
-      PEEKTIME	= 100,		/* milliseconds */
-      NLBUF	= 1024,
+enum
+{
+	PEEKTIME	= 100,	/* milliseconds */
+	NLBUF		= 1024,
 };
 
 typedef struct Cursor Cursor;
 typedef struct Line Line;
 typedef struct Matrix Matrix;
 
-struct Cursor {
+struct Cursor
+{
 	int	x;		/* starts at 0 */
 	int	y;		/* starts at 0 */
 };
 
-struct Line {
+struct Line
+{
 	char	buf[NLBUF];	/* line buffer including \0 */
 	int	nbuf;		/* buffer length excluding \0 */
 };
 
-struct Matrix {
+struct Matrix
+{
 	Line	*lines;		/* holds every line in a file with */
 	int	nlines;		/* number of lines */
 };
 
 struct tb_event	ev;		/* current event */
-Cursor		cursor;		/* current cursor position */
-Matrix		matrix;		/* the entire display */
-int		irstart;	/* row starting index for display */
-int		icstart;	/* col starting index for display */
+
+Cursor	cursor;		/* current cursor position */
+Matrix	matrix;		/* the entire display */
+int	irstart;	/* row starting index for display */
+int	icstart;	/* col starting index for display */
 
 void
 shut(int stat)
@@ -214,7 +219,7 @@ matloadfile(int argc, char *argv[])
 	
 	matinit();
 	m = &matrix;
-	for(;;) {
+	for (;;) {
 		char lbuf[NLBUF];
 		char *fg;
 		Line *larr, *lp;
@@ -266,7 +271,7 @@ main(int argc, char *argv[])
 
 	matloadfile(argc, argv);
 	irstart = 0;
-	for(;;) {
+	for (;;) {
 		tb_clear();
 		matdisplay();
 		if (evget() < 0)
