@@ -40,7 +40,7 @@ struct Matrix
 struct tb_event	ev;		/* current event */
 
 Cursor	cursor;		/* current cursor position */
-Matrix	matrix;		/* the entire display */
+Matrix	mat;		/* the entire display */
 int	irstart;	/* row starting index for display */
 int	icstart;	/* col starting index for display */
 
@@ -95,9 +95,9 @@ maxnline(void)
 	int i, n;
 	
 	n = 0;
-	for (i = 0; i < matrix.nlines; i++)
-		if (matrix.lines[i].nbuf > n)
-			n = matrix.lines[i].nbuf;
+	for (i = 0; i < mat.nlines; i++)
+		if (mat.lines[i].nbuf > n)
+			n = mat.lines[i].nbuf;
 	return n;
 }
 
@@ -140,7 +140,6 @@ evhandle(void)
 {
 	int ht, wd;
 	Cursor *c;
-	Matrix *m;
 	
 	switch (ev.type) {
 	case TB_EVENT_KEY:
@@ -153,7 +152,6 @@ evhandle(void)
 		return;
 	}
 
-	m = &matrix;
 	c = &cursor;
 	ht = tb_height();
 	wd = tb_width();
@@ -168,7 +166,7 @@ evhandle(void)
 	case TB_KEY_ARROW_DOWN:
 		if (c->y <= ht - 2)
 			setcursor(c->x, c->y + 1);
-		else if (irstart <= m->nlines - ht - 1)
+		else if (irstart <= mat.nlines - ht - 1)
 			irstart++;
 		break;
 	case TB_KEY_ARROW_LEFT:
@@ -187,7 +185,7 @@ evhandle(void)
 		setcursor(0, c->y);
 		break;
 	case TB_KEY_END:
-		setcursor(m->lines[c->y].nbuf - 1, c->y);
+		setcursor(mat.lines[c->y].nbuf - 1, c->y);
 		break;
 	case TB_KEY_PGUP:
 		irstart -= ht;
@@ -196,8 +194,8 @@ evhandle(void)
 		break;
 	case TB_KEY_PGDN:
 		irstart += ht;
-		if (irstart + ht >= m->nlines)
-			irstart = m->nlines - ht;
+		if (irstart + ht >= mat.nlines)
+			irstart = mat.nlines - ht;
 		break;
 	case TB_KEY_CTRL_Q:
 		shut(0);
@@ -207,24 +205,20 @@ evhandle(void)
 void
 matinit(void)
 {
-	Matrix *m;
-
-	m = &matrix;
-	m->lines = NULL;
-	m->nlines = 0;
+	mat.lines = NULL;
+	mat.nlines = 0;
 }
 
 void
 matfree(void)
 {
-	free(matrix.lines);
+	free(mat.lines);
 }
 
 void
 matloadfile(int argc, char *argv[])
 {
 	FILE *fp;
-	Matrix *m;
 
 	if (argc != 2)
 		eshut(1, "usage: dim <filename>\n");
@@ -234,7 +228,6 @@ matloadfile(int argc, char *argv[])
 		eshut(1, strerror(errno));
 	
 	matinit();
-	m = &matrix;
 	for (;;) {
 		char lbuf[NLBUF];
 		char *fg;
@@ -246,18 +239,18 @@ matloadfile(int argc, char *argv[])
 			return;
 		}
 
-		/* allocate new Line in matrix */
-		larr = reallocarray(m->lines, m->nlines + 1, sizeof(Line));
+		/* allocate new Line in mat */
+		larr = reallocarray(mat.lines, mat.nlines + 1, sizeof(Line));
 		if (larr == NULL) {
 			matfree();
 			fclose(fp);
 			eshut(1, strerror(errno));
 		}
-		m->lines = larr;
-		m->nlines++;
+		mat.lines = larr;
+		mat.nlines++;
 
 		/* fill up new Line */
-		lp = &(m->lines[m->nlines - 1]);
+		lp = &(mat.lines[mat.nlines - 1]);
 		strcpy(lp->buf, lbuf);
 		lp->nbuf = strlen(lbuf) + 1;
 	}
@@ -267,13 +260,11 @@ void
 matdisplay(void)
 {
 	int c, r;
-	Matrix *m;
 
-	m = &matrix;
-	for (r = 0; r < m->nlines && r < tb_height(); r++) {
-		/*tb_print(0, r, TB_DEFAULT, TB_DEFAULT, m->lines[irstart+r].buf);*/
+	for (r = 0; r < mat.nlines && r < tb_height(); r++) {
+		/*tb_print(0, r, TB_DEFAULT, TB_DEFAULT, mat.lines[irstart+r].buf);*/
 		Line *lp;
-		lp = &(m->lines[irstart + r]);
+		lp = &(mat.lines[irstart + r]);
 		for (c = 0; c < lp->nbuf; c++)
 			tb_set_cell(c, r, lp->buf[icstart + c], TB_DEFAULT, TB_DEFAULT);
 	}
