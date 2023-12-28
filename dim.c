@@ -50,7 +50,7 @@ void
 eshut(int stat, const char *s)
 {
 	tb_shutdown();
-	fprintf(stderr, s);
+	fputs(s, stderr);
 	exit(stat);
 }
 
@@ -58,7 +58,7 @@ eshut(int stat, const char *s)
 void
 error(const char *s)
 {
-	fprintf(stderr, s);
+	fputs(s, stderr);
 	fflush(stderr);
 }
 
@@ -145,14 +145,14 @@ evhandle(void)
 	case TB_KEY_ARROW_UP:
 		if (c->y > 0)
 			setcursor(c->x, c->y - 1);
-		else if (istart >= 1)
-			istart--;
+		else if (irstart >= 1)
+			irstart--;
 		break;
 	case TB_KEY_ARROW_DOWN:
 		if (c->y <= ht - 2)
 			setcursor(c->x, c->y + 1);
-		else if (istart <= m->nlines - ht - 1)
-			istart++;
+		else if (irstart <= m->nlines - ht - 1)
+			irstart++;
 		break;
 	case TB_KEY_ARROW_LEFT:
 		if (c->x > 0)
@@ -169,14 +169,14 @@ evhandle(void)
 		setcursor(m->lines[c->y].nbuf - 1, c->y);
 		break;
 	case TB_KEY_PGUP:
-		istart -= ht;
-		if (istart < 0)
-			istart = 0;
+		irstart -= ht;
+		if (irstart < 0)
+			irstart = 0;
 		break;
 	case TB_KEY_PGDN:
-		istart += ht;
-		if (istart + ht >= m->nlines)
-			istart = m->nlines - ht;
+		irstart += ht;
+		if (irstart + ht >= m->nlines)
+			irstart = m->nlines - ht;
 		break;
 	case TB_KEY_CTRL_Q:
 		shut(0);
@@ -250,9 +250,9 @@ matdisplay(void)
 
 	m = &matrix;
 	for (r = 0; r < m->nlines && r < tb_height(); r++) {
-		/*tb_print(0, r, TB_DEFAULT, TB_DEFAULT, m->lines[istart+r].buf);*/
+		/*tb_print(0, r, TB_DEFAULT, TB_DEFAULT, m->lines[irstart+r].buf);*/
 		Line *lp;
-		lp = &(m->lines[istart + r]);
+		lp = &(m->lines[irstart + r]);
 		for (c = 0; c < lp->nbuf; c++)
 			tb_set_cell(c, r, lp->buf[c], TB_DEFAULT, TB_DEFAULT);
 	}
@@ -265,7 +265,7 @@ main(int argc, char *argv[])
 	setcursor(0, 0);
 
 	matloadfile(argc, argv);
-	istart = 0;
+	irstart = 0;
 	for(;;) {
 		tb_clear();
 		matdisplay();
