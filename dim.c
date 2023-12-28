@@ -183,9 +183,11 @@ evhandle(void)
 		break;
 	case TB_KEY_HOME:
 		setcursor(0, c->y);
+		/* TODO move to start of line */
 		break;
 	case TB_KEY_END:
 		setcursor(mat.lines[c->y].nbuf - 1, c->y);
+		/* TODO move to end of line */
 		break;
 	case TB_KEY_PGUP:
 		irstart -= ht;
