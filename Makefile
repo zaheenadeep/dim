@@ -11,4 +11,4 @@ clean:
 dim: dim.o
 	$(CC) dim.o -o dim
 
-dim.o: dim.c termbox.h
+dim.o: dim.c termbox2.h
