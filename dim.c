@@ -90,6 +90,18 @@ nfgets(char *buf, int size, FILE *stream)
 }
 
 int
+maxnline(void)
+{
+	int i, n;
+	
+	n = 0;
+	for (i = 0; i < matrix.nlines; i++)
+		if (matrix.lines[i].nbuf > n)
+			n = matrix.lines[i].nbuf;
+	return n;
+}
+
+int
 evget(void)
 {
 	int pe;
@@ -162,10 +174,14 @@ evhandle(void)
 	case TB_KEY_ARROW_LEFT:
 		if (c->x > 0)
 			setcursor(c->x - 1, c->y);
+		else if (icstart >= 1)
+			icstart--;
 		break;
 	case TB_KEY_ARROW_RIGHT:
-		if (c->x < wd)
+		if (c->x <= wd - 2)
 			setcursor(c->x + 1, c->y);
+		else if (icstart <= maxnline() - wd - 1)
+			icstart++;
 		break;
 	case TB_KEY_HOME:
 		setcursor(0, c->y);
@@ -259,7 +275,7 @@ matdisplay(void)
 		Line *lp;
 		lp = &(m->lines[irstart + r]);
 		for (c = 0; c < lp->nbuf; c++)
-			tb_set_cell(c, r, lp->buf[c], TB_DEFAULT, TB_DEFAULT);
+			tb_set_cell(c, r, lp->buf[icstart + c], TB_DEFAULT, TB_DEFAULT);
 	}
 }
 
@@ -270,7 +286,7 @@ main(int argc, char *argv[])
 	setcursor(0, 0);
 
 	matloadfile(argc, argv);
-	irstart = 0;
+	irstart = icstart = 0;
 	for (;;) {
 		tb_clear();
 		matdisplay();
