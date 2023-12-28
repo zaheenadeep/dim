@@ -142,20 +142,18 @@ evhandle(void)
 	Cursor *c;
 	
 	switch (ev.type) {
+	case TB_EVENT_RESIZE:
+	case TB_EVENT_MOUSE:
+		return;
 	case TB_EVENT_KEY:
 		break;
-	case TB_EVENT_RESIZE:
-		/* TODO */
-		return;
-	default:
-		error("not an event key\n");
-		return;
 	}
 
 	c = &cursor;
 	ht = tb_height();
 	wd = tb_width();
 	
+	/* TODO limit cursor inside lines */
 	switch (ev.key) {
 	case TB_KEY_ARROW_UP:
 		if (c->y > 0)
